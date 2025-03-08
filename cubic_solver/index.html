@@ -6,7 +6,7 @@
     <title>삼차방정식 해 계산기</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 1000px; margin: auto; }
+        .container { max-width: 1500px; margin: auto; }
         input { width: 60px; margin: 5px; }
         button { margin-top: 10px; padding: 5px 15px; }
         .output { margin-top: 20px; font-weight: bold; }
@@ -47,8 +47,13 @@
             const progressLeftDiv = document.querySelector('#cubicProgressLeft');
             const progressRightDiv = document.querySelector('#cubicProgressRight');
             const resultDiv = document.querySelector('#cubicResult');
+            resultDiv.innerHTML = '';
             progressLeftDiv.innerHTML = '';
             progressRightDiv.innerHTML = '';
+
+            
+            const wolframLink = `https://www.wolframalpha.com/input?i=${a}x%5E3%2B${b}x%5E2%2B${c}x%2B${d}%3D0&lang=ko`;
+
             if (a == 0){
                 resultDiv.innerText = '3차항의 계수가 0입니다.';
                 return;
@@ -189,20 +194,32 @@
             p6r.innerHTML = `<hr>
                 <p>\\(D=q^2+\\frac{4p^3}{27}=${D}\\)</p>
                 <p>\\(x=${root1}\\)</p>
-                <p>각 근을 맨 처음 방정식에 대입한 결과</p>
-                <p>근1 대입: \\(${check1}\\)</p>
                 <p>\\(x=${root2}\\)</p>
-                <p>근2 대입: \\(${check2}\\)</p>
                 <p>\\(x=${root3}\\)</p>
-                <p>근3 대입: \\(${check3}\\)</p>
+                <p>근1 대입결과: \\(${check1}\\)</p>
+                <p>근2 대입결과: \\(${check2}\\)</p>
+                <p>근3 대입결과: \\(${check3}\\)</p>
                 <p>※주의※ 부동소수점 문제로 매우 작은 값이 나올 수 있음
                 `;
             progressRightDiv.appendChild(p6r);
 
-            
-            let roots = [];
+            const wolframA1 = document.createElement('a');
+            wolframA1.href = wolframLink;
+            wolframA1.innerText = '울프람의 풀이';
+            wolframA1.target='_blank';
+            progressRightDiv.appendChild(wolframA1);
 
-            resultDiv.innerText = '해: ' + roots;
+            
+            let roots = [root1,root2,root3];
+
+            const resultP = document.createElement('p');
+            resultP.innerText = '해: ' + roots;
+            resultDiv.appendChild(resultP); 
+            const wolframA2 = document.createElement('a');
+            wolframA2.href = wolframLink;
+            wolframA2.innerText = '울프람의 풀이';
+            wolframA2.target='_blank';
+            resultDiv.appendChild(wolframA2);
             MathJax.typeset();
         }
         
