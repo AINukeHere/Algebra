@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>삼차방정식 해 계산기</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1000px; margin: auto; }
+        input { width: 60px; margin: 5px; }
+        button { margin-top: 10px; padding: 5px 15px; }
+        .output { margin-top: 20px; font-weight: bold; }
+        .progress {border: 2px solid black;}
+        #cubicProgress{display: flex;}
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+</head>
+<body>
+    <a href="..">돌아가기</a>
+    <div class="container">
+        <h2>3차 방정식 해 계산</h2>
+        <input type="number" id="a3" placeholder="a">x³ +
+        <input type="number" id="b3" placeholder="b">x² +
+        <input type="number" id="c3" placeholder="c">x +
+        <input type="number" id="d3" placeholder="d"> = 0
+        <br>
+        <button onclick="solveCubic()">풀기</button>
+        <div id="cubicProgress">
+            <div id="cubicProgressLeft"></div>
+            <div id="cubicProgressRight"></div>
+        </div>
+        <div id="cubicResult" class="output"></div>
+    </div>
+
+    <script>
+        function solveCubic() {
+            let a = parseFloat(document.getElementById('a3').value) || 0;
+            let b = parseFloat(document.getElementById('b3').value) || 0;
+            let c = parseFloat(document.getElementById('c3').value) || 0;
+            let d = parseFloat(document.getElementById('d3').value) || 0;
+            // a=2;
+            // b=3;
+            // c=4;
+            // d=5;
+            const progressLeftDiv = document.querySelector('#cubicProgressLeft');
+            const progressRightDiv = document.querySelector('#cubicProgressRight');
+            const resultDiv = document.querySelector('#cubicResult');
+            progressLeftDiv.innerHTML = '';
+            progressRightDiv.innerHTML = '';
+            if (a == 0){
+                resultDiv.innerText = '3차항의 계수가 0입니다.';
+                return;
+            }
+
+            // ax^3+bx^2+cx+d=0을 x^3+ax^2+bx+c=0꼴로 변경
+            const p1 = document.createElement('div');
+            p1.innerHTML = `<hr>
+                <p>삼차항의 계수를 1로 만듦</p>
+                <p>\\( x^3+\\frac{b}{a}x^2+\\frac{c}{a}x+\\frac{d}{a}=0 \\)</p>`;
+            progressLeftDiv.appendChild(p1);
+            const p1r = document.createElement('div');
+            p1r.innerHTML = `<hr>
+                <p>　</p>
+                <p>\\( x^3+\\frac{${b}}{${a}}x^2+\\frac{${c}}{${a}}x+\\frac{${d}}{${a}}=0 \\)</p>`;
+            progressRightDiv.appendChild(p1r);
+
+            /// 이항정리를 사용하여 전차항 제거
+            const p2 = document.createElement('div');
+            p2.innerHTML = `<hr>
+                <p>위 식을 \\(x^3+ax^2+bx+c=0\\)으로 보고 이항정리를 사용하여 전차항 제거</p>
+                <p>\\( (x+\\frac{a}{3})^3+(b-\\frac{a^2}{3})x+c-\\frac{a^3}{27}=0 \\)</p>`;
+            progressLeftDiv.appendChild(p2);
+            
+            const temp = a;
+            a = b/temp;
+            b = c/temp;
+            c = d/temp;
+            const p2r = document.createElement('div');
+            p2r.innerHTML = `<hr>
+                <p>　</p>
+                <p>\\( (x+\\frac{${a}}{3})^3+(${b}-\\frac{${a}^2}{3})x+c-\\frac{${a}^3}{27}=0 \\)</p>`;
+            progressRightDiv.appendChild(p2r);
+
+            // 나머지 정리를 사용하여 x^3+px+q=0을 푸는 문제로 변경
+            const p3 = document.createElement('div');
+            p3.innerHTML = `<hr>
+                <p>나머지 정리를 사용하여 \\(x^3+px+q=0\\)을 푸는 문제로 변경</p>
+                <p>\\((b-\\frac{a^2}{3})x+c-\\frac{a^3}{27} = p(x+\\frac{a}{3})+q\\)이므로</p>
+                <p>\\((x+\\frac{a}{3})^3+p(x+\\frac{a}{3})+q=0\\)</p>
+                <p>\\(t=x+\\frac{a}{3}\\)라고하면</p>
+                <p>\\(t^3+pt+q=0 \\)</p>
+                <p>이때 \\(p=b-\\frac{a^2}{3}\\), \\(q=c+\\frac{2a^3-9ab}{27}\\)</p>`;
+            progressLeftDiv.appendChild(p3);
+            const p3r = document.createElement('div');
+            let p = b-a*a/3;
+            let q = c+(2*a*a*a-9*a*b)/27;
+            p3r.innerHTML = `<hr>
+                <p>　</p>
+                <p>\\((${b}-\\frac{${a}^2}{3})x+${c}-\\frac{${a}^3}{27} = p(x+\\frac{${a}}{3})+q\\)이므로</p>
+                <p>\\((x+\\frac{${a}}{3})^3+p(x+\\frac{${a}}{3})+q=0\\)</p>
+                <p>\\(t=x+\\frac{${a}}{3}\\)라고하면</p>
+                <p>\\(t^3+${p}t+${q}=0 \\)</p>
+                <p>　</p>`;
+            progressRightDiv.appendChild(p3r);
+            
+            const p4 = document.createElement('div');
+            p4.innerHTML = `<hr>
+                <p>근과 계수의 관계를 사용하여 이차방정식 + 세제곱근을 푸는 문제로 변경</p>
+                <p>\\(t=a+b\\)</p>
+                <p>\\(p=-3ab \\) </p>
+                <p>\\(q=-(a^3+b^3) \\)</p>
+                <p>\\(a^3\\)과 \\(b^3\\)을 근으로 가지는 이차방정식은 \\(t^2+qt-\\frac{p^3}{27}=0\\)</p>`;
+            progressLeftDiv.appendChild(p4);
+            const p4r = document.createElement('div');
+            p4r.innerHTML = `<hr>
+                <p>　</p>
+                <p>\\(t=a+b\\)</p>
+                <p>\\(p=-3ab \\) </p>
+                <p>\\(q=-(a^3+b^3) \\)</p>
+                <p>\\(a^3\\)과 \\(b^3\\)을 근으로 가지는 이차방정식은 \\(t^2+${q}t-\\frac{${p}^3}{27}=0\\)</p>`;
+            progressRightDiv.appendChild(p4r);
+
+            const p5 = document.createElement('div');
+            p5.innerHTML = `<hr>
+                <p>이차방정식 근의 공식으로 \\(a^3\\)과 \\(b^3\\)을 구하기</p>
+                <p>\\(a^3=\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
+                <p>\\(b^3=\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
+                `;
+            progressLeftDiv.appendChild(p5);
+            let D = q*q+(4*p*p*p)/27;
+            let sqrtD = Math.sqrt(D);
+            let a3 = (-q+sqrtD)/2;
+            let b3 = (-q-sqrtD)/2;
+            const p5r = document.createElement('div');
+            p5r.innerHTML = `<hr>
+                <p>　</p>
+                <p>\\(a^3=\\frac{-${q} + \\sqrt{${q}^2 + \\frac{4*${p}^3}{27}}}{2}=${a3}\\)</p>
+                <p>\\(b^3=\\frac{-${q} - \\sqrt{${q}^2 + \\frac{4*${p}^3}{27}}}{2}=${b3}\\)</p>
+                `;
+            progressRightDiv.appendChild(p5r);
+
+            const p6 = document.createElement('div');
+            p6.innerHTML = `<hr>
+                <p>a와 b의 세제곱근을 구하여 t를 구하기</p>
+                <p>\\(k = \\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
+                <p>\\(a^3=k\\)</p>
+                <p>\\(a=\\sqrt[3]{k}, \\sqrt[3]{k}\\omega, \\sqrt[3]{k}\\omega^2\\)</p>
+                <p>\\(l = \\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
+                <p>\\(b^3=l\\)</p>
+                <p>\\(b=\\sqrt[3]{l}, \\sqrt[3]{l}\\omega, \\sqrt[3]{l}\\omega^2\\)</p>
+                <p>\\(t=\\sqrt[3]{k}+\\sqrt[3]{l}, \\sqrt[3]{k}\\omega+\\sqrt[3]{l}\\omega, \\sqrt[3]{k}\\omega^2+\\sqrt[3]{l}\\omega^2\\)</p>
+                <p>\\(x=\\sqrt[3]{k}+\\sqrt[3]{l}-\\frac{a}{3}, \\sqrt[3]{k}\\omega+\\sqrt[3]{l}\\omega-\\frac{a}{3}, \\sqrt[3]{k}\\omega^2+\\sqrt[3]{l}\\omega^2-\\frac{a}{3}\\)</p>
+                <p>\\(x=\\sqrt[3]{\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}+\\sqrt[3]{\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}-\\frac{a}{3},\\)<br>
+                    \\(\\sqrt[3]{\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega+\\sqrt[3]{\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega^2-\\frac{a}{3},\\)<br>
+                    \\(\\sqrt[3]{\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega^2+\\sqrt[3]{\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega-\\frac{a}{3}\\)</p>
+                <p>\\(x=\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) + \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}+\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) - \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}-\\frac{a}{3},\\)<br>
+                    \\(\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) + \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega+\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) - \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega^2-\\frac{a}{3},\\)<br>
+                    \\(\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) + \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega^2+\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) - \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega-\\frac{a}{3}\\)</p>
+                `;
+            progressLeftDiv.appendChild(p6);
+            let w = math.complex(-1/2, -Math.sqrt(3)/2);
+            let _a_3 = math.complex(-a/3,0);
+            let a_comp = math.complex(a,0);
+            let b_comp = math.complex(b,0);
+            let c_comp = math.complex(c,0);
+            let root1 = math.complex(Math.cbrt( (-q+sqrtD) / 2 ) + Math.cbrt( (-q-sqrtD) / 2 ), 0).add(_a_3);
+            let root2_w1 = math.complex(Math.cbrt( (-q+sqrtD) / 2), 0);
+            let root2_w2 = math.complex(Math.cbrt( (-q-sqrtD) / 2), 0);
+            let root2 = math.add(math.multiply(root2_w1, w), math.multiply(root2_w2, math.multiply(w,w)), _a_3);
+            let root3_w1 = math.complex(Math.cbrt( (-q+sqrtD) / 2), 0);
+            let root3_w2 = math.complex(Math.cbrt( (-q-sqrtD) / 2), 0);
+            let root3 = math.add(math.multiply(root3_w1,math.multiply(w,w)), math.multiply(root3_w2, w), _a_3);
+            let check1 = math.add(math.multiply(root1,math.multiply(root1,root1)), math.multiply(a_comp, math.multiply(root1,root1)), math.multiply(b_comp,root1), c_comp);
+            let check2 = math.add(math.multiply(root2,math.multiply(root2,root2)), math.multiply(a_comp, math.multiply(root2,root2)), math.multiply(b_comp,root2), c_comp);
+            let check3 = math.add(math.multiply(root3,math.multiply(root3,root3)), math.multiply(a_comp, math.multiply(root3,root3)), math.multiply(b_comp,root3), c_comp);
+            const p6r = document.createElement('div');
+                // <p>\\(a=${a_comp}\\)</p>
+                // <p>\\(b=${b_comp}\\)</p>
+                // <p>\\(c=${c_comp}\\)</p>
+                // <p>\\(p=${q}\\)</p>
+                // <p>\\(q=${p}\\)</p>
+                // <p>\\(\\omega=${w}\\)</p>
+                // <p>\\(\\omega^2=${math.multiply(w,w)}\\)</p>
+                // <p>\\(root2_w1=${root2_w1}\\)</p>
+                // <p>\\(root2_w2=${root2_w2}\\)</p>
+                // <p>\\(-\\frac{a}{3}=${_a_3}\\)</p>
+            p6r.innerHTML = `<hr>
+                <p>\\(D=q^2+\\frac{4p^3}{27}=${D}\\)</p>
+                <p>\\(x=${root1}\\)</p>
+                <p>각 근을 맨 처음 방정식에 대입한 결과</p>
+                <p>근1 대입: \\(${check1}\\)</p>
+                <p>\\(x=${root2}\\)</p>
+                <p>근2 대입: \\(${check2}\\)</p>
+                <p>\\(x=${root3}\\)</p>
+                <p>근3 대입: \\(${check3}\\)</p>
+                <p>※주의※ 부동소수점 문제로 매우 작은 값이 나올 수 있음
+                `;
+            progressRightDiv.appendChild(p6r);
+
+            
+            let roots = [];
+
+            resultDiv.innerText = '해: ' + roots;
+            MathJax.typeset();
+        }
+        
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+</body>
+</html>
