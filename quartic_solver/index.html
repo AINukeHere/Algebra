@@ -75,6 +75,50 @@
     </div>
 
     <script>
+        function solveCubic(a,b,c,d) {
+            if (a == 0){
+                return '3차항의 계수가 0입니다.';
+            }
+
+            // ax^3+bx^2+cx+d=0을 x^3+ax^2+bx+c=0꼴로 변경            
+            const temp = a;
+            a = b/temp;
+            b = c/temp;
+            c = d/temp;
+            let p = b-a*a/3;
+            let q = c+(2*a*a*a-9*a*b)/27;
+            let D = q*q+(4*p*p*p)/27;
+            let sqrtD;
+            if (D < 0)
+                sqrtD = math.complex(0, math.sqrt(math.abs(D)));
+            else
+                sqrtD = math.complex(math.sqrt(D),0);
+            let a3 = math.multiply(math.add(-q,sqrtD),0.5);
+            let b3 = math.multiply(math.subtract(-q,sqrtD),0.5);
+            let w = math.complex(-1/2, -Math.sqrt(3)/2);
+            let _a_3 = math.complex(-a/3,0);
+            let a_comp = math.complex(a,0);
+            let b_comp = math.complex(b,0);
+            let c_comp = math.complex(c,0);
+            let root1, root2, root3;
+            if (D < 0){
+                root1 = math.add(math.cbrt(a3), math.cbrt( b3 ), _a_3);
+                root2 = math.add(math.multiply(math.cbrt(a3),w), math.multiply(math.cbrt( b3), math.multiply(w,w)), _a_3);
+                root3 = math.add(math.multiply(math.cbrt(a3),math.multiply(w,w)), math.multiply(math.cbrt( b3), w), _a_3);
+            }
+            else{
+                root1 = math.add(Math.cbrt(a3), Math.cbrt( b3 ), _a_3);
+                root2 = math.add(math.multiply(Math.cbrt(a3),w), math.multiply(Math.cbrt( b3), math.multiply(w,w)), _a_3);
+                root3 = math.add(math.multiply(Math.cbrt(a3),math.multiply(w,w)), math.multiply(Math.cbrt( b3), w), _a_3);
+            }
+            let check1 = math.add(math.multiply(root1,math.multiply(root1,root1)), math.multiply(a_comp, math.multiply(root1,root1)), math.multiply(b_comp,root1), c_comp);
+            let check2 = math.add(math.multiply(root2,math.multiply(root2,root2)), math.multiply(a_comp, math.multiply(root2,root2)), math.multiply(b_comp,root2), c_comp);
+            let check3 = math.add(math.multiply(root3,math.multiply(root3,root3)), math.multiply(a_comp, math.multiply(root3,root3)), math.multiply(b_comp,root3), c_comp);
+            
+            
+            return [root1,root2,root3,check1,check2,check3];
+        }
+        
         function solveQuartic() {
             let a = parseFloat(document.getElementById('a').value) || 0;
             let b = parseFloat(document.getElementById('b').value) || 0;
@@ -82,6 +126,11 @@
             let d = parseFloat(document.getElementById('d').value) || 0;
             let e = parseFloat(document.getElementById('e').value) || 0;
             
+            a=2;
+            b=3;
+            c=4;
+            d=5;
+            e=6;
             
             const resultDiv = document.querySelector('#quarticResult');
             const quarticProgressDiv = document.querySelector('#quarticProgress');
@@ -99,76 +148,125 @@
             // ax^3+bx^2+cx+d=0을 x^3+ax^2+bx+c=0꼴로 변경
             const p1 = document.createElement('div');
             p1.innerHTML = `<hr>
-                <p>삼차항의 계수를 1로 만듦</p>
-                <p>\\( x^3+\\frac{b}{a}x^2+\\frac{c}{a}x+\\frac{d}{a}=0 \\)</p>`;
+                <p>사차항의 계수를 1로 만듦</p>
+                <p>\\( x^4+\\frac{b}{a}x^3+\\frac{c}{a}x^2+\\frac{d}{a}x+\\frac{e}{a}=0 \\)</p>`;
             quarticProgressDiv.appendChild(p1);
             const p1r = document.createElement('div');
             p1r.innerHTML = `<hr>
                 <p>　</p>
-                <p>\\( x^3+\\frac{${b}}{${a}}x^2+\\frac{${c}}{${a}}x+\\frac{${d}}{${a}}=0 \\)</p>`;
+                <p>\\( x^4+\\frac{${b}}{${a}}x^3+\\frac{${c}}{${a}}x^2+\\frac{${d}}{${a}}x+\\frac{${e}}{${a}}=0 \\)</p>`;
             quarticProgressDiv.appendChild(p1r);
 
             /// 이항정리를 사용하여 전차항 제거
             const p2 = document.createElement('div');
             p2.innerHTML = `<hr>
-                <p>위 식을 \\(x^3+ax^2+bx+c=0\\)으로 보고 이항정리를 사용하여 전차항 제거</p>
-                <p>\\( (x+\\frac{a}{3})^3+(b-\\frac{a^2}{3})x+c-\\frac{a^3}{27}=0 \\)</p>`;
+                <p>위 식을 \\(x^4+ax^3+bx^2+cx+d=0\\)으로 보고 이항정리를 사용하여 전차항 제거</p>
+                <p>\\( x^4+4(\\frac{a}{4})x^3+6(\\frac{a}{4})^2x^2+4(\\frac{a}{4})^3x+(\\frac{a}{4})^4+bx^2+cx+d=
+                    6(\\frac{a}{4})^2x^2+4(\\frac{a}{4})^3x+(\\frac{a}{4})^4\\)</p>
+                <p>\\( (x+\\frac{a}{4})^4+(b-\\frac{3a^2}{8})x^2+(c-\\frac{a^3}{16})x+d-\\frac{a^4}{256}=0\\)</p>
+                `;
             quarticProgressDiv.appendChild(p2);
             
             const temp = a;
             a = b/temp;
             b = c/temp;
             c = d/temp;
+            d = e/temp;
             const p2r = document.createElement('div');
             p2r.innerHTML = `<hr>
                 <p>　</p>
-                <p>\\( (x+\\frac{${a}}{3})^3+(${b}-\\frac{${a}^2}{3})x+c-\\frac{${a}^3}{27}=0 \\)</p>`;
+                <p>\\( x^4+4(\\frac{${a}}{4})x^3+6(\\frac{${a}}{4})^2x^2+4(\\frac{${a}}{4})^3x+(\\frac{${a}}{4})^4+${b}x^2+${c}x+${d}=
+                    6(\\frac{${a}}{4})^2x^2+4(\\frac{${a}}{4})^3x+(\\frac{${a}}{4})^4\\)</p>
+                <p>\\( (x+\\frac{${a}}{4})^4+(b-\\frac{${3*a*a}}{8})x^2+(c-\\frac{${a*a*a}}{16})x+${d}-\\frac{${a*a*a*a}}{256}=0\\)</p>
+                `;
             quarticProgressDiv.appendChild(p2r);
 
-            // 나머지 정리를 사용하여 x^3+px+q=0을 푸는 문제로 변경
+            // t^4+pt^2+qt+r=0을 푸는 문제로 변경
             const p3 = document.createElement('div');
             p3.innerHTML = `<hr>
-                <p>나머지 정리를 사용하여 \\(x^3+px+q=0\\)을 푸는 문제로 변경</p>
-                <p>\\((b-\\frac{a^2}{3})x+c-\\frac{a^3}{27} = p(x+\\frac{a}{3})+q\\)이므로</p>
-                <p>\\((x+\\frac{a}{3})^3+p(x+\\frac{a}{3})+q=0\\)</p>
-                <p>\\(t=x+\\frac{a}{3}\\)라고하면</p>
-                <p>\\(t^3+pt+q=0 \\)</p>
-                <p>이때 \\(p=b-\\frac{a^2}{3}\\), \\(q=c+\\frac{2a^3-9ab}{27}\\)</p>`;
+                <p>\\(t^4+pt^2+qt+r=0\\)을 푸는 문제로 변경</p>
+                <p>\\(t=x+\\frac{a}{4}\\)로 두고 t에 대한 4차방정식으로 정리하면</p>
+                <p>\\(t^4+(b-\\frac{3a^2}{8})(t-\\frac{a}{4})^2+(c-\\frac{a^3}{16})(t-\\frac{a}{4})+d-\\frac{a^4}{256}=0\\)</p>
+                <p>\\(t^4+(b-\\frac{3a^2}{8})t^2+(c+\\frac{2a^3-8ab}{16})t+d-\\frac{3a^4-16a^2b+64ac}{256}=0\\)</p>
+                <p>\\(p=b-\\frac{3a^2}{8}, q=c+\\frac{2a^3-8ab}{16}, r=d-\\frac{3a^4-16a^2b+64ac}{256}\\)</p>
+                <p>\\(t^4+pt^2+qt+r=0\\)</p>
+                `;
             quarticProgressDiv.appendChild(p3);
             const p3r = document.createElement('div');
-            let p = b-a*a/3;
-            let q = c+(2*a*a*a-9*a*b)/27;
+            let p = b-(3*a*a)/8;
+            let q = c+(2*a*a*a-8*a*b)/16;
+            let r = d-(3*a*a*a*a-16*a*a*b+64*a*c)/256;
             p3r.innerHTML = `<hr>
                 <p>　</p>
-                <p>\\((${b}-\\frac{${a}^2}{3})x+${c}-\\frac{${a}^3}{27} = p(x+\\frac{${a}}{3})+q\\)이므로</p>
-                <p>\\((x+\\frac{${a}}{3})^3+p(x+\\frac{${a}}{3})+q=0\\)</p>
-                <p>\\(t=x+\\frac{${a}}{3}\\)라고하면</p>
-                <p>\\(t^3+${p}t+${q}=0 \\)</p>
-                <p>　</p>`;
+                <p>\\(t=x+\\frac{${a}}{4}\\)</p>
+                <p>\\(t^4+(${b}-\\frac{${3*a*a}}{8})(t-\\frac{${a}}{4})^2+(${c}-\\frac{${a*a*a}}{16})(t-\\frac{${a}}{4})+${d}-\\frac{${a*a*a*a}}{256}=0\\)</p>
+                <p>\\(t^4+(${b}-\\frac{${3*a*a}}{8})t^2+(${c}+\\frac{${2*a*a*a-8*a*b}}{16})t+${d}-\\frac{${3*a*a*a*a-16*a*a*b+64*a*c}}{256}=0\\)</p>
+                <p>　</p>
+                <p>\\(t^4+${p}t^2+${q}t+${r}=0\\)</p>
+                `;
             quarticProgressDiv.appendChild(p3r);
             
             const p4 = document.createElement('div');
             p4.innerHTML = `<hr>
-                <p>근과 계수의 관계를 사용하여 이차방정식 + 세제곱근을 푸는 문제로 변경</p>
-                <p>\\(t=a+b\\)</p>
-                <p>\\(p=-3ab \\) </p>
-                <p>\\(q=-(a^3+b^3) \\)</p>
-                <p>\\(a^3\\)과 \\(b^3\\)을 근으로 가지는 이차방정식은 \\(t^2+qt-\\frac{p^3}{27}=0\\)</p>`;
+                <p>\\(A^2-B^2\\)꼴로 변형하기위해 먼저 \\(px^2+p^2\\)를 더하고 뺀다.</p>
+                <p>\\(t^4+2pt^2+p^2-pt^2-p^2+qt+r=0\\)</p>
+                <p>\\((t^2+p)^2-pt^2+qt+r-p^2=0\\)</p>
+                <p>\\(p=k+l\\)로 나타내자. 그러면</p>
+                <p>\\((t^2+k+l)^2-(k+l)t^2+qt+r-(k+l)^2=0\\)</p>
+                <p>\\(t^4+k^2+l^2+2kt^2+2kl+2lt^2-(k+l)t^2+qt+r-(k+l)^2=0\\)</p>
+                <p>\\((t^2+k)^2+l^2+2kl+2lt^2-(k+l)t^2+qt+r-(k+l)^2=0\\)</p>
+                <p>\\((t^2+k)^2+(l-k)t^2+qt+l^2+2kl+r-(k+l)^2=0\\)</p>
+                <p>\\(l=p-k\\)이므로</p>
+                <p>\\((t^2+k)^2+(p-2k)t^2+qt+(p-k)^2+2k(p-k)+r-p^2=0\\)</p>
+                <p>\\((t^2+k)^2+(p-2k)t^2+qt-k^2+r=0\\)</p>
+                <p>\\((t^2+k)^2-((2k-p)t^2-qt+k^2-r)=0\\)</p>
+                <p>\\(k\\)는 \\((2k-p)t^2-qt+k^2-r\\)이 완전제곱식이 되도록 선택하였으므로 판별식이 0이고</p>
+                <p>\\(q^2-4(2k-p)(k^2-r)=0\\)이는 k에 대한 3차방정식이다.</p>
+                <p>\\(k\\)에 대한 3차방정식의 근을 s라고 하면</p>
+                <p>\\(s^2-r=\\frac{q^2}{4(2s-p)}\\)를 얻을 수 있고 완전제곱식이 되어야하는 식은</p>
+                <p>\\((2s-p)t^2-qt+\\frac{q^2}{4(2s-p)}=(2s-p)(t^2-\\frac{q}{2s-p}t+\\frac{q^2}{4(s-p)^2})=(2s-p)(t-\\frac{q}{2(2s-p)})^2\\)이므로</p>
+                <p>\\(t^4+pt^2+qt+r=0\\)은 다음과 같이 인수분해된다.</p>
+                <p>\\((t^2+s)^2-(2s-p)(t+\\frac{q}{2(2s-p)})^2=0\\)</p>
+                <p>\\((t^2+s)^2-(\\sqrt{(2s-p)}(t+\\frac{q}{2(2s-p)}))^2=0\\)</p>
+                <p>\\((t^2+s+\\sqrt{(2s-p)}(t+\\frac{q}{2(2s-p)}))(t^2+s-\\sqrt{(2s-p)}(t+\\frac{q}{2(2s-p)}))=0\\)</p>
+                <p>\\(\\)</p>
+                <p>\\(\\)</p>
+                `;
             quarticProgressDiv.appendChild(p4);
             const p4r = document.createElement('div');
+            let solutions = solveCubic(8,-p,-8*r,p*r-q*q);
+            console.log(solutions);
+            let k = solutions[0];
+            let l = math.subtract(p,k);
             p4r.innerHTML = `<hr>
-                <p>　</p>
-                <p>\\(t=a+b\\)</p>
-                <p>\\(p=-3ab \\) </p>
-                <p>\\(q=-(a^3+b^3) \\)</p>
-                <p>\\(a^3\\)과 \\(b^3\\)을 근으로 가지는 이차방정식은 \\(t^2+${q}t-\\frac{${p}^3}{27}=0\\)</p>`;
+                <p>\\(A^2-B^2\\)꼴로 변형하기위해 먼저 \\(px^2+p^2\\)를 더하고 뺀다.</p>
+                <p>\\(t^4+${2*p}t^2+${p*p}-${p}t^2-${p*p}+${q}t+${r}=0\\)</p>
+                <p>\\((t^2+${p})^2-${p}t^2+${q}t+${r}-${p*p}=0\\)</p>
+                <p>\\(${p}=${k}+${l}\\)로 나타내자. 그러면</p>
+                <p>\\((t^2+k+l)^2-(k+l)t^2+qt+r-(k+l)^2=0\\)</p>
+                <p>\\(t^4+k^2+l^2+2kt^2+2kl+2lt^2-(k+l)t^2+qt+r-(k+l)^2=0\\)</p>
+                <p>\\((t^2+k)^2+l^2+2kl+2lt^2-(k+l)t^2+qt+r-(k+l)^2=0\\)</p>
+                <p>\\((t^2+k)^2+(l-k)t^2+qt+l^2+2kl+r-(k+l)^2=0\\)</p>
+                <p>\\(l=p-k\\)이므로</p>
+                <p>\\((t^2+k)^2+(p-2k)t^2+qt+(p-k)^2+2k(p-k)+r-p^2=0\\)</p>
+                <p>\\((t^2+k)^2+(p-2k)t^2+qt-k^2+r=0\\)</p>
+                <p>\\((t^2+k)^2-((2k-p)t^2-qt+k^2-r)=0\\)</p>
+                <p>\\(k\\)는 \\((2k-p)t^2-qt+k^2-r\\)이 완전제곱식이 되도록 선택하였으므로 판별식이 0이고</p>
+                <p>\\(q^2-4(2k-p)(k^2-r)=0\\)이는 k에 대한 3차방정식이다.</p>
+                <p>\\(k\\)에 대한 3차방정식의 근을 s라고 하면</p>
+                <p>\\(s^2-r=\\frac{q^2}{4(2s-p)}\\)를 얻을 수 있고 완전제곱식이 되어야하는 식은</p>
+                <p>\\((2s-p)t^2-qt+\\frac{q^2}{4(2s-p)}=(2s-p)(t^2-\\frac{q}{2s-p}t+\\frac{q^2}{4(s-p)^2})=(2s-p)(t-\\frac{q}{2(2s-p)})^2\\)이므로</p>
+                <p>\\(t^4+pt^2+qt+r=0\\)은 다음과 같이 인수분해된다.</p>
+                <p>\\((t^2+s)^2-(2s-p)(t+\\frac{q}{2(2s-p)})^2=0\\)</p>
+                <p>\\((t^2+s)^2-(\\sqrt{(2s-p)}(t+\\frac{q}{2(2s-p)}))^2=0\\)</p>
+                <p>\\((t^2+s+\\sqrt{(2s-p)}(t+\\frac{q}{2(2s-p)}))(t^2+s-\\sqrt{(2s-p)}(t+\\frac{q}{2(2s-p)}))=0\\)</p>
+                <p>\\(\\)</p>
+                <p>\\(\\)</p>
+                `;
             quarticProgressDiv.appendChild(p4r);
 
             const p5 = document.createElement('div');
             p5.innerHTML = `<hr>
-                <p>이차방정식 근의 공식으로 \\(a^3\\)과 \\(b^3\\)을 구하기</p>
-                <p>\\(a^3=\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
-                <p>\\(b^3=\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
                 `;
             quarticProgressDiv.appendChild(p5);
             let D = q*q+(4*p*p*p)/27;
@@ -178,28 +276,11 @@
             const p5r = document.createElement('div');
             p5r.innerHTML = `<hr>
                 <p>　</p>
-                <p>\\(a^3=\\frac{-${q} + \\sqrt{${q}^2 + \\frac{4*${p}^3}{27}}}{2}=${a3}\\)</p>
-                <p>\\(b^3=\\frac{-${q} - \\sqrt{${q}^2 + \\frac{4*${p}^3}{27}}}{2}=${b3}\\)</p>
                 `;
             quarticProgressDiv.appendChild(p5r);
 
             const p6 = document.createElement('div');
             p6.innerHTML = `<hr>
-                <p>a와 b의 세제곱근을 구하여 t를 구하기</p>
-                <p>\\(k = \\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
-                <p>\\(a^3=k\\)</p>
-                <p>\\(a=\\sqrt[3]{k}, \\sqrt[3]{k}\\omega, \\sqrt[3]{k}\\omega^2\\)</p>
-                <p>\\(l = \\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}\\)</p>
-                <p>\\(b^3=l\\)</p>
-                <p>\\(b=\\sqrt[3]{l}, \\sqrt[3]{l}\\omega, \\sqrt[3]{l}\\omega^2\\)</p>
-                <p>\\(t=\\sqrt[3]{k}+\\sqrt[3]{l}, \\sqrt[3]{k}\\omega+\\sqrt[3]{l}\\omega, \\sqrt[3]{k}\\omega^2+\\sqrt[3]{l}\\omega^2\\)</p>
-                <p>\\(x=\\sqrt[3]{k}+\\sqrt[3]{l}-\\frac{a}{3}, \\sqrt[3]{k}\\omega+\\sqrt[3]{l}\\omega-\\frac{a}{3}, \\sqrt[3]{k}\\omega^2+\\sqrt[3]{l}\\omega^2-\\frac{a}{3}\\)</p>
-                <p>\\(x=\\sqrt[3]{\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}+\\sqrt[3]{\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}-\\frac{a}{3},\\)<br>
-                    \\(\\sqrt[3]{\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega+\\sqrt[3]{\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega^2-\\frac{a}{3},\\)<br>
-                    \\(\\sqrt[3]{\\frac{-q + \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega^2+\\sqrt[3]{\\frac{-q - \\sqrt{q^2 + \\frac{4p^3}{27}}}{2}}\\omega-\\frac{a}{3}\\)</p>
-                <p>\\(x=\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) + \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}+\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) - \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}-\\frac{a}{3},\\)<br>
-                    \\(\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) + \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega+\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) - \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega^2-\\frac{a}{3},\\)<br>
-                    \\(\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) + \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega^2+\\sqrt[3]{\\frac{-(c+\\frac{2a^3-9ab}{27}) - \\sqrt{(c+\\frac{2a^3-9ab}{27})^2 - \\frac{4(b-\\frac{a^2}{3})^3}{27}}}{2}}\\omega-\\frac{a}{3}\\)</p>
                 `;
             quarticProgressDiv.appendChild(p6);
             let w = math.complex(-1/2, -Math.sqrt(3)/2);
@@ -254,7 +335,7 @@
             resultDiv.appendChild(wolframA2);
             MathJax.typeset();
         }
-        
+        solveQuartic();
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
 </body>

@@ -170,13 +170,9 @@
                 `;
             cubicProgressDiv.appendChild(p5);
             let D = q*q+(4*p*p*p)/27;
-            let sqrtD;
-            if (D < 0)
-                sqrtD = math.complex(0, math.sqrt(math.abs(D)));
-            else
-                sqrtD = math.complex(math.sqrt(D),0);
-            let a3 = math.multiply(math.add(-q,sqrtD),0.5);
-            let b3 = math.multiply(math.subtract(-q,sqrtD),0.5);
+            let sqrtD = Math.sqrt(D);
+            let a3 = (-q+sqrtD)/2;
+            let b3 = (-q-sqrtD)/2;
             const p5r = document.createElement('div');
             p5r.innerHTML = `<hr>
                 <p>　</p>
@@ -209,26 +205,19 @@
             let a_comp = math.complex(a,0);
             let b_comp = math.complex(b,0);
             let c_comp = math.complex(c,0);
-            let root1, root2, root3;
-            if (D < 0){
-                root1 = math.add(math.cbrt(a3), math.cbrt( b3 ), _a_3);
-                root2 = math.add(math.multiply(math.cbrt(a3),w), math.multiply(math.cbrt( b3), math.multiply(w,w)), _a_3);
-                root3 = math.add(math.multiply(math.cbrt(a3),math.multiply(w,w)), math.multiply(math.cbrt( b3), w), _a_3);
-            }
-            else{
-                root1 = math.add(Math.cbrt(a3), Math.cbrt( b3 ), _a_3);
-                root2 = math.add(math.multiply(Math.cbrt(a3),w), math.multiply(Math.cbrt( b3), math.multiply(w,w)), _a_3);
-                root3 = math.add(math.multiply(Math.cbrt(a3),math.multiply(w,w)), math.multiply(Math.cbrt( b3), w), _a_3);
-            }
+            let root1 = math.complex(Math.cbrt( a3 ) + Math.cbrt( b3 ), 0).add(_a_3);
+            let root2_w1 = math.complex(Math.cbrt( a3), 0);
+            let root2_w2 = math.complex(Math.cbrt( b3), 0);
+            let root2 = math.add(math.multiply(root2_w1, w), math.multiply(root2_w2, math.multiply(w,w)), _a_3);
+            let root3_w1 = math.complex(Math.cbrt( a3), 0);
+            let root3_w2 = math.complex(Math.cbrt( b3), 0);
+            let root3 = math.add(math.multiply(root3_w1,math.multiply(w,w)), math.multiply(root3_w2, w), _a_3);
             let check1 = math.add(math.multiply(root1,math.multiply(root1,root1)), math.multiply(a_comp, math.multiply(root1,root1)), math.multiply(b_comp,root1), c_comp);
             let check2 = math.add(math.multiply(root2,math.multiply(root2,root2)), math.multiply(a_comp, math.multiply(root2,root2)), math.multiply(b_comp,root2), c_comp);
             let check3 = math.add(math.multiply(root3,math.multiply(root3,root3)), math.multiply(a_comp, math.multiply(root3,root3)), math.multiply(b_comp,root3), c_comp);
             const p6r = document.createElement('div');
-            // <p>\\(root2_w1=${root2_w1}\\)</p>
-            // <p>\\(root2_w2=${root2_w2}\\)</p>
             // <p>\\(\\sqrt[3]{a^3}=${math.cbrt(a3)}\\)</p>
             // <p>\\(\\sqrt[3]{b^3}=${math.cbrt(b3)}\\)</p>
-            // <p>\\(\\sqrt[3]{x}=${Math.cbrt(b3)}\\)</p>
             // <p>\\(a=${a_comp}\\)</p>
             // <p>\\(b=${b_comp}\\)</p>
             // <p>\\(c=${c_comp}\\)</p>
@@ -236,6 +225,8 @@
             // <p>\\(q=${p}\\)</p>
             // <p>\\(\\omega=${w}\\)</p>
             // <p>\\(\\omega^2=${math.multiply(w,w)}\\)</p>
+            // <p>\\(root2_w1=${root2_w1}\\)</p>
+            // <p>\\(root2_w2=${root2_w2}\\)</p>
             // <p>\\(-\\frac{a}{3}=${_a_3}\\)</p>
             p6r.innerHTML = `<hr>
                 <p>\\(D=q^2+\\frac{4p^3}{27}=${D}\\)</p>
