@@ -157,7 +157,7 @@
             quarticProgressDiv.appendChild(p1);
             const p1r = document.createElement('div');
             p1r.innerHTML = `<hr>
-                <p>　</p>
+                <p>사차항의 계수를 1로 만듦</p>
                 <p>\\( x^4+\\frac{${b}}{${a}}x^3+\\frac{${c}}{${a}}x^2+\\frac{${d}}{${a}}x+\\frac{${e}}{${a}}=0 \\)</p>`;
             quarticProgressDiv.appendChild(p1r);
 
@@ -178,7 +178,7 @@
             d = e/temp;
             const p2r = document.createElement('div');
             p2r.innerHTML = `<hr>
-                <p>　</p>
+                <p>위 식을 \\(x^4+ax^3+bx^2+cx+d=0\\)으로 보고 이항정리를 사용하여 전차항 제거</p>
                 <p>\\( x^4+4(\\frac{${a}}{4})x^3+6(\\frac{${a}}{4})^2x^2+4(\\frac{${a}}{4})^3x+(\\frac{${a}}{4})^4+${b}x^2+${c}x+${d}\\)</p>
                 <p>\\(=6(\\frac{${a}}{4})^2x^2+4(\\frac{${a}}{4})^3x+(\\frac{${a}}{4})^4\\)</p>
                 <p>\\( (x+\\frac{${a}}{4})^4+(b-\\frac{${3*a*a}}{8})x^2+(c-\\frac{${a*a*a}}{16})x+${d}-\\frac{${a*a*a*a}}{256}=0\\)</p>
@@ -201,7 +201,7 @@
             let q = c+(2*a*a*a-8*a*b)/16;
             let r = (-3*a*a*a*a+16*a*a*b-64*a*c+256*d)/256;
             p3r.innerHTML = `<hr>
-                <p>　</p>
+                <p>\\(t^4+pt^2+qt+r=0\\)을 푸는 문제로 변경</p>
                 <p>\\(t=x+\\frac{${a}}{4}\\)로 두고 t에 대한 4차방정식으로 정리하면</p>
                 <p>\\(t^4+(${b}-\\frac{${3*a*a}}{8})(t-\\frac{${a}}{4})^2+(${c}-\\frac{${a*a*a}}{16})(t-\\frac{${a}}{4})+${d}-\\frac{${a*a*a*a}}{256}=0\\)</p>
                 <p>\\(t^4+(${b}-\\frac{${3*a*a}}{8})t^2+(${c}+\\frac{${2*a*a*a-8*a*b}}{16})t+${d}-\\frac{${3*a*a*a*a-16*a*a*b+64*a*c}}{256}=0\\)</p>
