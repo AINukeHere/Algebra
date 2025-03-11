@@ -52,6 +52,10 @@
             display: grid;
             grid-template-columns:1fr 1fr;
         }
+        .rootBox{
+            border: 1px solid red;
+            padding: 5px;
+        }
     </style>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -220,9 +224,12 @@
                 root2 = math.add(math.multiply(Math.cbrt(a3),w), math.multiply(Math.cbrt( b3), math.multiply(w,w)), _a_3);
                 root3 = math.add(math.multiply(Math.cbrt(a3),math.multiply(w,w)), math.multiply(Math.cbrt( b3), w), _a_3);
             }
-            let check1 = math.add(math.multiply(root1,math.multiply(root1,root1)), math.multiply(a_comp, math.multiply(root1,root1)), math.multiply(b_comp,root1), c_comp);
-            let check2 = math.add(math.multiply(root2,math.multiply(root2,root2)), math.multiply(a_comp, math.multiply(root2,root2)), math.multiply(b_comp,root2), c_comp);
-            let check3 = math.add(math.multiply(root3,math.multiply(root3,root3)), math.multiply(a_comp, math.multiply(root3,root3)), math.multiply(b_comp,root3), c_comp);
+            // let check1 = math.add(math.multiply(root1,math.multiply(root1,root1)), math.multiply(a_comp, math.multiply(root1,root1)), math.multiply(b_comp,root1), c_comp);
+            // let check2 = math.add(math.multiply(root2,math.multiply(root2,root2)), math.multiply(a_comp, math.multiply(root2,root2)), math.multiply(b_comp,root2), c_comp);
+            // let check3 = math.add(math.multiply(root3,math.multiply(root3,root3)), math.multiply(a_comp, math.multiply(root3,root3)), math.multiply(b_comp,root3), c_comp);
+            let check1 = math.add(math.pow(root1,3), math.multiply(a_comp, math.pow(root1,2)), math.multiply(b_comp, root1), c_comp);
+            let check2 = math.add(math.pow(root2,3), math.multiply(a_comp, math.pow(root2,2)), math.multiply(b_comp, root2), c_comp);
+            let check3 = math.add(math.pow(root3,3), math.multiply(a_comp, math.pow(root3,2)), math.multiply(b_comp, root3), c_comp);
             const p6r = document.createElement('div');
             // <p>\\(root2_w1=${root2_w1}\\)</p>
             // <p>\\(root2_w2=${root2_w2}\\)</p>
@@ -239,9 +246,11 @@
             // <p>\\(-\\frac{a}{3}=${_a_3}\\)</p>
             p6r.innerHTML = `<hr>
                 <p>\\(D=q^2+\\frac{4p^3}{27}=${D}\\)</p>
+                <div class='rootBox'>
                 <p>\\(x=${root1}\\)</p>
                 <p>\\(x=${root2}\\)</p>
                 <p>\\(x=${root3}\\)</p>
+                </div>
                 <p>근1 대입결과: \\(${check1}\\)</p>
                 <p>근2 대입결과: \\(${check2}\\)</p>
                 <p>근3 대입결과: \\(${check3}\\)</p>
