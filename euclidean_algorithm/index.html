@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유클리드 알고리즘</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        .container > div:first-child {
+            text-align: center;
+        }
+        .container {
+            max-width: 1600px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        input {
+            width: 100px;
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        #progress{
+            display: grid;
+            grid-template-columns:1fr 1fr;
+        }
+        .rootBox{
+            border: 1px solid red;
+            padding: 5px;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+</head>
+<body>
+    <a href="..">돌아가기</a>
+    <div class="container">
+        <div>
+            <h2>유클리드 알고리즘</h2>
+            <p>gcd\((a,b)\)를 구해보자.</p>
+            a=<input type="number" id="a" placeholder="33554432"><br>
+            b=<input type="number" id="b" placeholder="10000000"><br>
+            <button onclick="solve()">구하기</button>
+        </div>
+        <div id="progress"></div>
+        <div id="result" class="output"></div>
+    </div>
+
+    <script>
+        function solve() {
+            let a = parseInt(document.getElementById('a').value) || 0;
+            let b = parseInt(document.getElementById('b').value) || 0;
+
+            const _a = a;
+            const _b = b;
+            // a=26;
+            // b=13;
+            
+            const resultDiv = document.querySelector('#result');
+            const progressDiv = document.querySelector('#progress');
+            progressDiv.innerHTML = '';
+            resultDiv.innerHTML = '';
+
+            
+            const wolframLink1 = `https://www.wolframalpha.com/input?i=gcd%28${a}%2C${b}%29&lang=ko`;
+            const wolframLink2 = `https://www.wolframalpha.com/input?i=egcd%28${a}%2C${b}%29&lang=ko`;
+
+            if (a == 0 && b == 0){
+                resultDiv.innerHTML = '적어도 a와 b 둘 중 하나는 0이 아니어야합니다.<br>';
+                return;
+            }
+            else if(a < 0 || b < 0)
+            {
+                resultDiv.innerHTML += '음수는 어떻게 해야할지 모루겠서요.<br>';
+                return;
+            }
+
+            const p1 = document.createElement('div');
+            let result = 0;
+            let count = 0;
+            let stack= []
+            while (b != 0){
+                q = Math.floor(a/b);
+                r = a % b;
+                stack.push([a,b,q,r])
+                p1.innerHTML += `<p>\\(${a}=${b}\\times${q}+${r}\\) ⋯ gcd\\((${a}, ${b})=\\)gcd\\((${b},${r})\\)</p>`;
+                a = b;
+                b = r;
+                count += 1;
+            }
+            p1.innerHTML += `
+                <p>gcd\\((${a}, ${b})=${a}\\)</p>
+                <p>&nbsp;</p>
+                <p>그러므로 gcd\\((${_a}, ${_b})=${a}\\)</p>
+            `;
+            result = a;
+            progressDiv.appendChild(p1);
+
+            const p1r = document.createElement('div');
+            p1r.innerHTML += '<p>확장된 유클리드 알고리즘</p>';
+            p1r.innerHTML += `<p>\\(${_a}x+${_b}y=${result}\\)를 만족하는 정수 x, y는</p>`;
+            let placeholder = null;
+            let q_ = 1;
+            let r_ = 1;
+            let c = 1;
+            let d = 1;
+            for(let i =0; i < stack.length; ++i){
+                console.log(`[${i}] = ${stack[i]}`);
+            }
+            if (stack.length == 0){ // 예외 1: b가 0이라서 while문 돌지도 못함
+                p1r.innerHTML +=`
+                    <div class='rootBox'>
+                    <p>\\(x=1+0k\\)</p>
+                    <p>\\(y\\in\\mathbb{Z}\\)</p>
+                    </div>
+                `;
+            }
+            if (stack.length == 1) // 예외 2: a가 b로 나눠떨어짐
+            {
+                const a = stack[0][0];
+                const b = stack[0][1];
+                const q = stack[0][2];
+                const r = stack[0][3];
+                let xk = b/result;
+                let yk = -a/result;
+                if (_a == 0){ // 예외 3: a가 0임
+                    p1r.innerHTML += `
+                        <div class='rootBox'>
+                        <p>\\(x\\in\\mathbb{Z}\\)</p>
+                        <p>\\(y=1+0k\\)</p>
+                        </div>
+                    `;
+                }
+                else{
+                    p1r.innerHTML += `<p>\\(${result}=${result}\\times(${a/result}\\times(1)+${b/result}\\times(${-q}))\\)</p>`;
+                    p1r.innerHTML += `
+                        <div class='rootBox'>
+                        <p>\\(x=1+${b/result}k\\)</p>
+                        <p>\\(y=${-q}+${-a/result}k\\)</p>
+                        </div>
+                    `;
+                }
+            }
+            else{
+                for(let i = stack.length-2; i >= 0; --i){
+                    const a = stack[i][0];
+                    const b = stack[i][1];
+                    const q = stack[i][2];
+                    const r = stack[i][3];
+                    if (placeholder == null){
+                        p1r.innerHTML += `<p>\\(${r}=${a}+${b}\\times${-q}\\)</p>`;
+                        // p1r.innerHTML += `<p>\\(${result}=${result}+\\times1\\)</p>`;
+                        placeholder = `${result}=${a}+{b}\\times(${-q})`;
+                        if (i == 0){
+                            p1r.innerHTML += `
+                                <p>\\(${result}=${result}\\times(${a/result}\\times(1)+${b/result}\\times(${-q}))\\)</p>
+                                <div class='rootBox'>
+                                <p>\\(x=1+${b/result}k\\)</p>
+                                <p>\\(y=${-q}+${-a/result}k\\)</p>
+                                </div>`;
+                        }
+                        c=1;
+                        d=-q;
+                    }
+                    else{
+                        p1r.innerHTML += `<p>\\(${placeholder.replace('{b}', `(${a}+(${b}\\times${-q}))`)}\\) ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯ \\(${r}=${a}+${b}\\times${-q}\\)</p>`;
+                        p1r.innerHTML += `<p>\\(${result}=${a}\\times(${d})+${b}\\times(${-q*d+c})\\)</p>`;
+                        placeholder = `${result}=${a}\\times(${d})+{b}\\times(${-q*d+c})`;
+                        if (i == 0){
+                            p1r.innerHTML += `
+                                <p>\\(${result}=${result}\\times(${a/result}\\times(${d})+${b/result}\\times(${-q*d+c}))\\)</p>
+                                <div class='rootBox'>
+                                <p>\\(x=${d}+${b/result}k\\)</p>
+                                <p>\\(y=${-q*d+c}+${-a/result}k\\)</p>
+                                </div>`;
+                        }
+                        const temp_c = c;
+                        c = d;
+                        d = -q*d+temp_c;
+                    }
+                    q_ = q;
+                    r_ = r;
+                };
+            }
+            progressDiv.appendChild(p1r);
+
+            const wolframA1 = document.createElement('a');
+            wolframA1.href = wolframLink1;
+            wolframA1.innerText = '울프람의 풀이(gcd)';
+            wolframA1.target='_blank';
+            progressDiv.appendChild(wolframA1);
+            const wolframA2 = document.createElement('a');
+            wolframA2.href = wolframLink2;
+            wolframA2.innerText = '울프람의 풀이(egcd)';
+            wolframA2.target='_blank';
+            progressDiv.appendChild(wolframA2);
+            MathJax.typeset();
+        }
+        solve();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+</body>
+</html>
