@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일차 합동식 계산기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        .container > div:first-child {
+            text-align: center;
+        }
+        .container {
+            max-width: 1600px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        input {
+            width: 100px;
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        #progress{
+            display: grid;
+            overflow: auto;
+            grid-template-columns:1fr 1fr;
+        }
+        #progress div{
+            max-width: 800ps; /* 개별 항목 최대 높이 */
+            overflow: auto; /* 넘칠 경우 스크롤 */
+        }
+        .rootBox{
+            border: 1px solid red;
+            padding: 5px;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+</head>
+<body>
+    <a href="..">돌아가기</a>
+    <div class="container">
+        <div>
+            <h2>일차 합동식 계산기</h2>
+            <input type="number" id="a" placeholder="1234">x
+            ≡<input type="number" id="b" placeholder="5678">
+            (mod <input type="number" id="n" placeholder="9101111">)<br>
+            <button onclick="solve()">구하기</button>
+        </div>
+        <div id="progress"></div>
+        <div id="result" class="output"></div>
+    </div>
+
+    <script>
+        function gcd(a,b){
+            return b === 0 ? a : gcd(b, a % b);
+        }
+        function my_egcd(a,b) {
+            const _a = a;
+            const _b = b;
+            const gcd_a_b = gcd(a,b);
+            
+            let result = 0;
+            let count = 0;
+            let stack= []
+            while (b != 0){
+                q = Math.floor(a/b);
+                r = a % b;
+                stack.push([a,b,q,r])
+                a = b;
+                b = r;
+                count += 1;
+            }
+            result = a;
+            let placeholder = null;
+            let q_ = 1;
+            let r_ = 1;
+            let c = 1;
+            let d = 1;
+            if (stack.length == 0){ // 예외 1: b가 0이라서 while문 돌지도 못함
+                return [gcd_a_b, 1, 0, 'Z', 0];
+            }
+            if (stack.length == 1) // 예외 2: a가 b로 나눠떨어짐
+            {
+                const a = stack[0][0];
+                const b = stack[0][1];
+                const q = stack[0][2];
+                const r = stack[0][3];
+                let xk = b/result;
+                let yk = -a/result;
+                if (_a == 0){ // 예외 3: a가 0임
+                    return [gcd_a_b, 'Z', 0, 1, 0];
+                }
+                else{
+                    return [gcd_a_b, r, b/result,1,-a/result];
+                }
+            }
+            else{
+                for(let i = stack.length-2; i >= 0; --i){
+                    const a = stack[i][0];
+                    const b = stack[i][1];
+                    const q = stack[i][2];
+                    const r = stack[i][3];
+                    if (placeholder == null){
+                        placeholder = `${result}=${a}+{b}\\times(${-q})`;
+                        if (i == 0){
+                            return [gcd_a_b,1,b/result,-q,-a/result];
+                        }
+                        c=1;
+                        d=-q;
+                    }
+                    else{
+                        if (i == 0){
+                            return [gcd_a_b,d,b/result,-q*d+c,-a/result];
+                        }
+                        const temp_c = c;
+                        c = d;
+                        d = -q*d+temp_c;
+                    }
+                    q_ = q;
+                    r_ = r;
+                };
+            }
+        }
+        
+        function egcd(a, b) {
+            if (a === 0) {
+                return { gcd: b, x: 0, y: 1 };
+            }
+            
+            let { gcd, x: x1, y: y1 } = egcd(b % a, a);
+            let x = y1 - Math.floor(b / a) * x1;
+            let y = x1;
+            
+            return { gcd, x, y };
+        }
+        function inv(a,n){
+            let {gcd, x, _} = egcd(a, n)
+            if (x < 0)
+                x += n;
+            if (gcd != 1)
+                return NaN;//"{a}의 역수는 모듈로 {n}에서 존재하지 않습니다."
+            console.log(`inv(${a}, ${n}) = ${x%n})`);
+            return x % n;
+        }
+        function getFactorization(n) {
+            let factors = {};
+            let divisor = 2;
+            
+            while (n >= 2) {
+                while (n % divisor === 0) {
+                    factors[divisor] = (factors[divisor] || 0) + 1;
+                    n /= divisor;
+                }
+                divisor++;
+            }
+            
+            return factors;
+        }
+        
+        function solveWithInverse(method_count, a, b, n, p){
+            let nFactor = 1;
+            const gcd_a_b = gcd(a,b);
+            p.innerHTML += `
+                <hr>
+                <h3>방법 ${++method_count}. 역수 사용</h3>
+            `;
+            if (gcd_a_b !== 1){
+                a/=gcd_a_b;
+                b/=gcd_a_b;
+                nFactor = gcd(gcd_a_b,n);
+                n/=nFactor;
+                p.innerHTML += `
+                    <p>${a*gcd_a_b}와 ${b*gcd_a_b}의 공약수 ${gcd_a_b}로 나누면</p>
+                    <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)로 간단히 써줄 수 있다</p>
+                `;
+            }
+
+            if (gcd(a,n) !== 1)
+                return method_count;
+
+            const inv_result = inv(a,n);
+            p.innerHTML += `
+                <p>모듈로 ${n}에서 ${a}의 역수 ${inv_result}를 곱해주면</p>
+                <p>\\(x\\equiv${b*inv_result}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)</p>
+            `;
+            let root = b*inv_result;
+            if (root >= n){
+                root %= n;
+                p.innerHTML += `<p>정리하면 \\(x\\equiv${root}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)</p>`;
+            }
+            
+            if (nFactor > 1){
+                let roots = [];
+                for (let i = 0; i < nFactor; ++i){
+                    roots.push(root+i*n);
+                }
+                p.innerHTML += `
+                <p>원래 mod로 복원하면</p>
+                <p>\\(x\\equiv${roots.join(',')}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n*nFactor})\\)</p>
+                `;
+            }
+            return method_count;
+        }
+        function solveWithEGSD(method_count, a, b, n, p){
+            let [gcd_a_n, x1,xk,y1,yk] = my_egcd(a,n);
+
+            console.log(`egcd(${a},${n})=${gcd_a_n}, ${x1}+${xk}k, ${y1}+${yk}k`);
+            const multiplier = b/gcd_a_n;
+            let x1_gcd = x1*multiplier;
+            while (x1_gcd < 0)
+                x1_gcd += xk;
+            if (x1_gcd >= xk)
+                x1_gcd %= xk;
+            p.innerHTML += `
+                <hr>
+                <h3>방법 ${++method_count}. 확장된 유클리드 알고리즘 사용</h3>
+                <p>합동식 정의에 따라 \\(${n}\\vert${a}x-${b}\\)이므로</p>
+                <p>\\(${a}x-${b}=${n}k\\) (k는 정수)</p>
+                <p>\\(${a}x-${n}k=${b}\\)</p>
+                <p>y=-k로 두면</p>
+                <p>\\(${a}x+${n}y=${b}\\)</p>
+                <p>확장된 유클리드 알고리즘을 사용하여 \\(${a}x+${n}y=${gcd_a_n}\\)를 만족하는 x를 구하면</p>
+                <p>\\(${gcd_a_n}(${-yk}\\times(${x1})+${xk}\\times${y1})\\)로부터</p>
+                <p>\\(x=${x1}+${xk}k\\)</p>
+                <p>주어진 식에서 구하고자 하는 x는 \\(${x1}\\times${multiplier}+${xk}k=${x1_gcd}+${xk}k\\)</p>
+            `;
+            let roots = [];
+            let _root = x1_gcd;
+            while (_root < n){
+                if (_root >= 0 )
+                    roots.push(_root);
+                _root += xk;
+            }
+            p.innerHTML += `
+            <p>mod ${n}에서 만족하는 x는 ${roots.join(',')}</p>
+            <p>\\(x\\equiv${roots.join(',')}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)</p>
+            `;
+
+            return method_count;
+        }
+        function solveWithCRT(method_count, a, b, n, p){
+            let nFactor = 1;
+            const gcd_a_b = gcd(a,b);
+            if (gcd_a_b !== 1){
+                a/=gcd_a_b;
+                b/=gcd_a_b;
+                nFactor = gcd(gcd_a_b,n);
+                n/=nFactor;
+            }
+            const factors = getFactorization(n);
+            const keys = Object.keys(factors);
+            if (keys.length < 2)
+                return method_count;
+            p.innerHTML += `
+                <hr>
+                <h3>방법 ${++method_count}. 중국인의 나머지 정리 사용</h3>
+                <p>${a*gcd_a_b}와 ${b*gcd_a_b}의 공약수 ${gcd_a_b}로 나누면</p>
+                <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)로 간단히 써줄 수 있다</p>
+            `;
+            let temp_s = '';
+            let v_elements = []; // 소인수분해 결과(소수들의 제곱은 계산되어있는)
+            let new_exps = []; // 분리된 합동식 (a,b,n) 형식 ax=b (mod n)
+            let new_exp_roots = []; // 분리된 합동식들의 근. (x1, n) 형식 x=x1 (mod n)
+            let v_mods = [];
+            for (let key in factors){
+                v_elements.push(`${key}^${factors[key]}`);
+                const new_exp = [a,b,Math.pow(key,factors[key])];
+                new_exps.push(new_exp);
+            }
+            // new_exps = [[a,b,10],[a,b,21]];
+            p.innerHTML += `
+                <p>${n}은 \\(${v_elements.join('\\times')}\\)로 소인수분해가 가능하므로 합동식을 분리하면</p>
+                `;
+            
+            temp_s += '<p>\\(\\begin{cases}';
+            new_exps.forEach(new_exp => {
+                
+                let [gcd_a_n, x1, xk, y1, yk] = my_egcd(new_exp[0], new_exp[2]);
+                console.log(`egcd(${new_exp[0]}, ${new_exp[2]}) = ${gcd_a_n}, ${x1}+${xk}, ${y1}+${yk})`);
+                x1 = Math.floor(x1 * new_exp[1] / gcd_a_n) % new_exp[2];
+                while (x1 < 0)
+                    x1 += new_exp[2];
+                new_exp_roots.push([x1, new_exp[2]]);
+                v_mods.push(new_exp[2]);
+                temp_s += `
+                    ${new_exp[0]}x\\equiv${new_exp[1]}\\,(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${new_exp[2]})\\quad
+                    x\\equiv${x1}\\,(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${new_exp[2]})\\quad
+                    \\\\
+                `; 
+            });
+            temp_s += '\\end{cases}\\)</p>';
+            p.innerHTML += temp_s;
+            let v_crtElements = [];
+            let crtElements = [];
+            let v_invs = [];
+            new_exp_roots.forEach(root=>{
+                temp_s = `${root[0]}(`;
+                const _s = v_mods.filter(mod => mod !== root[1]).join('\\times');
+                temp_s += `${_s}\\times((${_s})^{-1}\\,\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${root[1]})`;
+                let gop = v_mods.filter(mod => mod !== root[1]).reduce((acc, num) => acc*num, 1);
+                const inv_result = inv(gop, root[1])
+                v_invs.push(inv_result);
+                temp_s += `)`;
+                v_crtElements.push(temp_s);
+                crtElements.push(root[0]*gop*inv_result);
+            });
+            p.innerHTML += `
+                <p>중국인의 나머지 정리 적용</p>
+                <p>\\(${v_crtElements.join('+')}\\)</p>
+            `;
+            let crtElementHap = crtElements.reduce((acc, num)=> acc+num, 0);
+            p.innerHTML += `
+                <p>역수는 각각 \\(${v_invs.join(',')}\\) 이므로</p>
+                <p>\\(${crtElements.join('+')}=${crtElementHap}\\)<p>`;
+            
+            let root = crtElementHap;
+            if (root >= n){
+                root %= n;
+            }
+            p.innerHTML += `
+                <p>즉 \\(x\\equiv${root}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)<p>
+            `;
+            if (nFactor > 1){
+                let roots = [];
+                for (let i = 0; i < nFactor; ++i){
+                    roots.push(root+i*n);
+                }
+                p.innerHTML += `
+                <p>원래 mod로 복원하면</p>
+                <p>\\(x\\equiv${roots.join(',')}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n*nFactor})\\)</p>
+                `;
+            }
+
+            return method_count;
+        }
+        function solveWithConst(method_count, a, b, n, p){
+            let nFactor = 1;
+            const gcd_a_b = gcd(a,b);
+            p.innerHTML += `
+                <hr>
+                <h3>방법 ${++method_count}. 상수항 변형과 나눗셈 사용</h3>
+            `;
+            if (gcd_a_b !== 1){
+                a/=gcd_a_b;
+                b/=gcd_a_b;
+                nFactor = gcd(gcd_a_b,n);
+                n/=nFactor;
+                p.innerHTML += `
+                    <p>${a*gcd_a_b}와 ${b*gcd_a_b}의 공약수 ${gcd_a_b}로 나누면</p>
+                    <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)로 간단히 써줄 수 있다</p>
+                `;
+            }
+            let num = 1;
+            while ( (b+num*n) % a != 0){
+                num++;
+            }
+
+            if (gcd(a,n) !== 1)
+                return method_count;
+            b += n*num;
+            p.innerHTML += `
+                <p>상수항에 ${num*n}을 더하면</p>
+                <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)</p>
+                <p>${a}로 나눠주면</p>
+                <p>\\(x\\equiv${b/a}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)</p>
+            `;
+            let root = b/a;
+            if (root >= n){
+                root %= n;
+                p.innerHTML += `<p>정리하면 \\(x\\equiv${root}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)</p>`;
+            }
+            
+            if (nFactor > 1){
+                let roots = [];
+                for (let i = 0; i < nFactor; ++i){
+                    roots.push(root+i*n);
+                }
+                p.innerHTML += `
+                <p>원래 mod로 복원하면</p>
+                <p>\\(x\\equiv${roots.join(',')}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n*nFactor})\\)</p>
+                `;
+            }
+            return method_count;
+        }
+        function solve() {
+            let a = parseInt(document.getElementById('a').value) || 0;
+            let b = parseInt(document.getElementById('b').value) || 0;
+            let n = parseInt(document.getElementById('n').value) || 0;
+
+            if (a == 0 && b == 0 && n == 0){
+                a=1234;
+                b=5678;
+                n=9101111;
+            }
+            
+            const resultDiv = document.querySelector('#result');
+            const progressDiv = document.querySelector('#progress');
+            progressDiv.innerHTML = '';
+            resultDiv.innerHTML = '';
+            
+            const wolframLink1 = `https://www.wolframalpha.com/input?i=${a}x%E2%89%A1${b}%28mod+${n}%29&lang=ko`;
+
+            let noRoot = false;
+            if (n < 1){
+                resultDiv.innerHTML = 'n이 1보다 작습니다.<br>';
+                noRoot = true;
+            }
+            if (a == 0)
+            {
+                resultDiv.innerHTML = 'a가 0입니다.<br>';
+                noRoot = true;
+            }
+            if (b % gcd(a,n) !== 0){
+                resultDiv.innerHTML = '정수해가 존재하지 않음<br>';
+                noRoot = true;
+            }
+            
+            if (!noRoot){
+                // p1.innerHTML +=`
+                //     <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\) 를 풀어보자</p>
+                //     `;
+                // if (b > n || a > n){
+                //     p1.innerHTML +=`
+                //     <p>\\(${a}\\equiv${a%n}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)이고
+                //     \\(${b}\\equiv${b%n}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)이므로</p>
+                //     `;
+                //     b %= n;
+                //     a %= n;
+                //     p1.innerHTML +=`
+                //         <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)로 간단히 써줄 수 있다</p>
+                //     `;
+                // }
+
+                let method_count = 0;
+                const p1 = document.createElement('div');
+                const p2 = document.createElement('div');
+                const p3 = document.createElement('div');
+                const p4 = document.createElement('div');
+                //역수로 풀기
+                method_count = solveWithInverse(method_count, a, b, n, p1);
+                //상수항 + 나눗셈으로 풀기
+                method_count = solveWithConst(method_count, a, b, n, p2);
+                //일차 디오판토스 방정식으로 풀기
+                method_count = solveWithEGSD(method_count, a, b, n, p3);               
+                // 중나정으로 풀기
+                method_count = solveWithCRT(method_count, a, b, n, p4);
+                progressDiv.appendChild(p1);
+                progressDiv.appendChild(p2);
+                progressDiv.appendChild(p3);
+                progressDiv.appendChild(p4);
+            }
+            const wolframA1 = document.createElement('a');
+            wolframA1.href = wolframLink1;
+            wolframA1.innerText = '울프람의 풀이';
+            wolframA1.target='_blank';
+            progressDiv.appendChild(wolframA1);
+            MathJax.typeset();
+        }
+        // solve();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+</body>
+</html>

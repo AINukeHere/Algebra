@@ -76,12 +76,32 @@
     </div>
 
     <script>
+        function solveEq(a,b){
+            let a_tmp = a;
+            let x = 1;
+            let g = a;
+            let v = 0;
+            let w = b;
+            let q = 0;
+            let t = 0;
+            let s = 0;
+            while (w != 0){
+                q = Math.floor(g/w);
+                t=g%w;
+                s = x-q*v;
+                x=v;
+                g=w;
+                v=s;
+                w=t;
+            }
+            console.log(`( ${x}, ${(g-a_tmp*x)/b}, ${g} )`);
+        }
         function solve() {
             let a = parseInt(document.getElementById('a').value) || 0;
             let b = parseInt(document.getElementById('b').value) || 0;
             // a=30;
             // b=6;
-
+            solveEq(a,b);
             const _a = a;
             const _b = b;
 
