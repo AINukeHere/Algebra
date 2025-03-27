@@ -283,10 +283,14 @@
                 return method_count;
             p.innerHTML += `
                 <hr>
-                <h3>방법 ${++method_count}. 중국인의 나머지 정리 사용</h3>
+                <h3>방법 ${++method_count}. 중국인의 나머지 정리 사용</h3>`;
+                
+            if (gcd_a_b !== 1){
+            p.innerHTML += `
                 <p>${a*gcd_a_b}와 ${b*gcd_a_b}의 공약수 ${gcd_a_b}로 나누면</p>
                 <p>\\(${a}x\\equiv${b}\\;(\\mathsf{m}\\mathsf{o}\\mathsf{d}\\,${n})\\)로 간단히 써줄 수 있다</p>
             `;
+            }
             let temp_s = '';
             let v_elements = []; // 소인수분해 결과(소수들의 제곱은 계산되어있는)
             let new_exps = []; // 분리된 합동식 (a,b,n) 형식 ax=b (mod n)
